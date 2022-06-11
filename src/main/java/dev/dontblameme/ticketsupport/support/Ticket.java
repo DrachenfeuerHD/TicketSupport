@@ -74,7 +74,6 @@ public class Ticket {
 
         MessageEmbed builder = new EmbedBuilder()
                 .setTitle("Closed " + user.getName())
-                .addField("Information", "User: " + user.getAsMention() + "\nID: " + userID, true)
                 .setDescription("Your ticket has been closed by a staff member")
                 .setFooter(user.getName(), (user.getAvatarUrl() == null ? user.getDefaultAvatarUrl() : user.getAvatarUrl()))
                 .build();

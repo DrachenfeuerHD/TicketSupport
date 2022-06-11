@@ -62,7 +62,7 @@ public class Events extends ListenerAdapter {
 
         Ticket ticket = new Ticket(body, e);
 
-        e.reply("Your ticket has been created! You can find it at <#" + ticket.getChannel().getId() + ">").setEphemeral(true).queue();
+        e.reply("Your ticket has been created successfully! You can find it at <#" + ticket.getChannel().getId() + ">").setEphemeral(true).queue();
     }
 
     @Override
@@ -75,7 +75,7 @@ public class Events extends ListenerAdapter {
         String ticketID = buttonID.split(":")[1];
 
         if(!TicketUtils.containsTicket(ticketID)) {
-            e.reply("This Ticket does not exist").setEphemeral(true).complete();
+            e.reply("This is not a valid ticket").setEphemeral(true).complete();
             return;
         }
 

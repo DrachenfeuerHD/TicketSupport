@@ -39,7 +39,7 @@ public class TicketUtils {
                 String lineName = line.split(":")[0];
 
                 if(!isNumeric(value))
-                    throw new IllegalStateException("The config value of " + value + " may only be a number. You need to provide IDs.");
+                    throw new IllegalStateException("The config value of " + value + " can only be a number. You need to provide IDs.");
 
                 if(lineName.equalsIgnoreCase("ServerToUse")) guildID = value;
                 if(lineName.equalsIgnoreCase("CategoryForTickets")) categoryID = value;
