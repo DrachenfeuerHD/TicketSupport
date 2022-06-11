@@ -14,6 +14,8 @@ import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class Events extends ListenerAdapter {
@@ -32,6 +34,19 @@ public class Events extends ListenerAdapter {
 
             Category category = (Category) Objects.requireNonNull(e.getOption("category")).getAsGuildChannel();
             Role role = Objects.requireNonNull(e.getOption("role")).getAsRole();
+
+            if(TicketUtils.existsServer(e.getGuild().getIdLong())) {
+
+                List<Ticket> ticketList = new ArrayList<>(TicketUtils.getServer(e.getGuild().getIdLong()).getTickets());
+
+                TicketUtils.removeServer(TicketUtils.getServer(e.getGuild().getIdLong()));
+                TicketUtils.addServer(new CustomServer(e.getGuild().getIdLong(), category.getIdLong(), role.getIdLong()));
+
+                ticketList.forEach(ticket -> TicketUtils.getServer(e.getGuild().getIdLong()).addTicket(ticket));
+
+                e.reply("The server has been successfully updated").setEphemeral(true).queue();
+                return;
+            }
 
             TicketUtils.addServer(new CustomServer(e.getGuild().getIdLong(), category.getIdLong(), role.getIdLong()));
 
