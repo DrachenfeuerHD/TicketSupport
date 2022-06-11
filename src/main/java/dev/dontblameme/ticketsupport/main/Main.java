@@ -34,7 +34,7 @@ public class Main {
         String token = Files.readString(tokenFile.toPath());
 
         if(token.isEmpty())
-            throw new IllegalStateException("Please provide a token inside of the file.");
+            throw new IllegalStateException("Please provide a token inside of the " + tokenFile.getName() + " file.");
 
         jda = JDABuilder.createLight(token, EnumSet.allOf(GatewayIntent.class))
                 .addEventListeners(new Events())
