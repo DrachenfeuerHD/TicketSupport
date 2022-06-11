@@ -5,7 +5,10 @@ import dev.dontblameme.ticketsupport.utils.TicketUtils;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.ChannelType;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 
@@ -45,9 +48,14 @@ public class Main {
 
         TicketUtils.load();
 
-        CommandListUpdateAction commands = Objects.requireNonNull(jda.getGuildById(TicketUtils.getGuild().getIdLong())).updateCommands()
+        OptionData category = new OptionData(OptionType.CHANNEL, "category", "Category for tickets", true);
+        category.setChannelTypes(ChannelType.CATEGORY);
+
+        CommandListUpdateAction commands = Objects.requireNonNull(jda.updateCommands()
                 .addCommands(Commands.slash("support", "Ask for Support"))
-                .addCommands(Commands.slash("close", "Close a ticket"));
+                .addCommands(Commands.slash("close", "Close a ticket")))
+                .addCommands(Commands.slash("invite", "Add the bot to your server"))
+                .addCommands(Commands.slash("setup", "Setup a server").addOptions(category).addOption(OptionType.ROLE, "role", "Role for managing tickets", true));
 
         commands.queue();
 

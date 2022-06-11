@@ -1,55 +1,61 @@
 package dev.dontblameme.ticketsupport.support;
 
 import dev.dontblameme.ticketsupport.main.Main;
-import dev.dontblameme.ticketsupport.utils.TicketUtils;
 import lombok.Getter;
+import lombok.Setter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 
 public class Ticket {
     private final long userID;
     @Getter
-    private final User user;
+    @Setter
+    private User user;
     @Getter
-    private final String guildID;
+    private final CustomServer server;
     @Getter
     private TextChannel channel;
+    @Getter
+    @Setter
+    private String id;
 
-    public Ticket(long userID, String guildID, String channelID) {
+    public Ticket(long userID, CustomServer server, String channelID) {
         this.userID = userID;
-        this.guildID = guildID;
+        this.server = server;
+        this.id = "ticket-" + new Random().nextLong();
 
-        List<Member> members = Objects.requireNonNull(Main.getJDA().getGuildById(guildID)).loadMembers().get();
+        Objects.requireNonNull(Main.getJDA().getGuildById(server.getGuildId())).loadMembers().onSuccess(list -> setUser(Objects.requireNonNull(list.stream().filter(m -> m.getIdLong() == userID).findFirst().orElse(null)).getUser()));
+
+        this.channel = Objects.requireNonNull(Main.getJDA().getGuildById(server.getGuildId())).getTextChannelById(channelID);
+    }
+
+    public Ticket(long userID, CustomServer server, String body, Guild guild) {
+        this.userID = userID;
+        this.server = server;
+        this.id = "ticket-" + new Random().nextLong();
+
+        List<Member> members = guild.loadMembers().get();
 
         this.user = Objects.requireNonNull(members.stream().filter(m -> m.getIdLong() == userID).findFirst().orElse(null)).getUser();
-        this.channel = Objects.requireNonNull(Main.getJDA().getGuildById(guildID)).getTextChannelById(channelID);
+
+        create(body, guild);
     }
 
-    public Ticket(String body, ModalInteractionEvent event) {
+    private void create(String body, Guild guild) {
 
-        this.userID = event.getUser().getIdLong();
-        this.guildID = Objects.requireNonNull(event.getGuild()).getId();
-        this.user = event.getUser();
+        if(this.channel != null) return;
 
-        create(body);
-    }
-
-    private void create(String body) {
-
-        this.channel = TicketUtils.getCategory().createTextChannel(user.getName())
-                .addMemberPermissionOverride(user.getIdLong(), EnumSet.of(Permission.MESSAGE_SEND, Permission.VIEW_CHANNEL), EnumSet.of(Permission.MESSAGE_ADD_REACTION))
-                .addRolePermissionOverride(TicketUtils.getRole().getIdLong(), EnumSet.of(Permission.MESSAGE_SEND, Permission.VIEW_CHANNEL, Permission.MANAGE_CHANNEL), EnumSet.of(Permission.UNKNOWN))
-                .addRolePermissionOverride(TicketUtils.getGuild().getPublicRole().getIdLong(), EnumSet.of(Permission.UNKNOWN), EnumSet.of(Permission.VIEW_CHANNEL))
+        this.channel = Objects.requireNonNull(guild.getCategoryById(server.getTicketsChannel())).createTextChannel(id)
+                .addMemberPermissionOverride(userID, EnumSet.of(Permission.MESSAGE_SEND, Permission.VIEW_CHANNEL), EnumSet.of(Permission.MESSAGE_ADD_REACTION))
+                .addRolePermissionOverride(server.getStaffRoleId(), EnumSet.of(Permission.MESSAGE_SEND, Permission.VIEW_CHANNEL, Permission.MANAGE_CHANNEL), EnumSet.of(Permission.UNKNOWN))
+                .addRolePermissionOverride(guild.getPublicRole().getIdLong(), EnumSet.of(Permission.UNKNOWN), EnumSet.of(Permission.VIEW_CHANNEL))
                 .complete();
 
         MessageEmbed msg = new EmbedBuilder()
@@ -59,22 +65,25 @@ public class Ticket {
                 .setFooter(user.getName(), (user.getAvatarUrl() == null ? user.getDefaultAvatarUrl() : user.getAvatarUrl()))
                 .build();
 
-        channel.sendMessageEmbeds(msg).setActionRow(Button.danger("close:" + channel.getId(), "Close")).complete();
+        channel.sendMessageEmbeds(msg).setActionRow(Button.danger("close:" + channel.getIdLong(), "Close")).complete();
 
-        channel.sendMessage(TicketUtils.getRole().getAsMention()).complete();
+        channel.sendMessage(Objects.requireNonNull(guild.getRoleById(server.getStaffRoleId())).getAsMention()).complete();
 
-        TicketUtils.addTicket(this);
+        server.addTicket(this);
     }
 
     public void close() {
 
         channel.delete().complete();
 
-        TicketUtils.removeTicket(this);
+        server.removeTicket(this);
+
+        Guild guild = Objects.requireNonNull(Main.getJDA().getGuildById(server.getGuildId()));
 
         MessageEmbed builder = new EmbedBuilder()
                 .setTitle("Closed " + user.getName())
-                .setDescription("Your ticket has been closed by a staff member")
+                .setThumbnail(guild.getIconUrl())
+                .setDescription("Your ticket on the server " + guild.getName() + " has been closed by a staff member")
                 .setFooter(user.getName(), (user.getAvatarUrl() == null ? user.getDefaultAvatarUrl() : user.getAvatarUrl()))
                 .build();
 
