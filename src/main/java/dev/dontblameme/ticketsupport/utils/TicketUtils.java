@@ -82,6 +82,10 @@ public class TicketUtils {
         servers.add(server);
     }
 
+    public static void removeServer(CustomServer server) {
+        servers.remove(server);
+    }
+
     public static CustomServer getServer(long id) {
         return servers.stream().filter(server -> server.getGuildId() == id).findFirst().orElse(null);
     }
