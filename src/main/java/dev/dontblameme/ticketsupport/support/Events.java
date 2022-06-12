@@ -53,11 +53,11 @@ public class Events extends ListenerAdapter {
             e.reply("The server has been successfully set up").setEphemeral(true).queue();
             return;
         } else if(e.getName().equals("invite")) {
-            e.reply("You can add this bot to your server by using [this](https://discord.com/oauth2/authorize?client_id=974255886811942943&scope=bot&permissions=8) and then [this](https://discord.com/api/oauth2/authorize?client_id=974255886811942943&scope=applications.commands) link").setEphemeral(true).queue();
+            e.reply("You can add this bot to your server by using [this](https://discord.com/oauth2/authorize?client_id=974255886811942943&permissions=2415995928&scope=bot%20applications.commands) link").setEphemeral(true).queue();
             return;
         }
 
-        if(!TicketUtils.existsServer(e.getGuild().getIdLong())) {
+        if(!TicketUtils.existsServer(e.getGuild().getIdLong()) || (TicketUtils.existsServer(e.getGuild().getIdLong()) && (e.getGuild().getCategoryById(TicketUtils.getServer(e.getGuild().getIdLong()).getTicketsChannel()) == null || e.getGuild().getRoleById(TicketUtils.getServer(e.getGuild().getIdLong()).getStaffRoleId()) == null))) {
             e.reply("This server is not setup yet. Contact an administrator who can use the /setup command").setEphemeral(true).queue();
             return;
         }
