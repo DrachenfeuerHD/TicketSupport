@@ -13,16 +13,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
+@Getter
 public class Ticket {
     private final long userID;
-    @Getter
     @Setter
     private User user;
-    @Getter
     private final CustomServer server;
-    @Getter
     private TextChannel channel;
-    @Getter
     @Setter
     private String id;
 
@@ -75,7 +72,6 @@ public class Ticket {
     public void close() {
 
         channel.delete().complete();
-
         server.removeTicket(this);
 
         Guild guild = Objects.requireNonNull(Main.getJDA().getGuildById(server.getGuildId()));
