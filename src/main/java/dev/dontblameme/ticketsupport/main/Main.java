@@ -1,14 +1,11 @@
 package dev.dontblameme.ticketsupport.main;
 
+import dev.dontblameme.ticketsupport.commands.*;
 import dev.dontblameme.ticketsupport.support.Events;
 import dev.dontblameme.ticketsupport.utils.TicketUtils;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.entities.ChannelType;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 
@@ -17,12 +14,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Objects;
 
 public class Main {
 
     private static JDA jda;
+    private static final ArrayList<Command> COMMAND_LIST = new ArrayList<>();
 
     public static void main(String[] args) throws IOException, InterruptedException, LoginException {
 
@@ -45,26 +45,29 @@ public class Main {
                 .build();
 
         jda.awaitReady();
-
         TicketUtils.load();
 
-        OptionData category = new OptionData(OptionType.CHANNEL, "category", "Category for tickets", true);
-        category.setChannelTypes(ChannelType.CATEGORY);
+        COMMAND_LIST.add(new Close());
+        COMMAND_LIST.add(new Invite());
+        COMMAND_LIST.add(new Setup());
+        COMMAND_LIST.add(new Support());
 
-        CommandListUpdateAction commands = Objects.requireNonNull(jda.updateCommands()
-                .addCommands(Commands.slash("support", "Ask for Support"))
-                .addCommands(Commands.slash("close", "Close a ticket")))
-                .addCommands(Commands.slash("invite", "Add the bot to your server"))
-                .addCommands(Commands.slash("setup", "Setup a server").addOptions(category).addOption(OptionType.ROLE, "role", "Role for managing tickets", true));
+        CommandListUpdateAction commands = Objects.requireNonNull(jda.updateCommands());
+
+        for(Command c : COMMAND_LIST)
+            commands.addCommands(c.getCommand());
 
         commands.queue();
 
         Runtime.getRuntime().addShutdownHook(new Thread(TicketUtils::save));
-
     }
 
     public static JDA getJDA() {
         return jda;
+    }
+
+    public static List<Command> getCommands() {
+        return COMMAND_LIST;
     }
 
 }

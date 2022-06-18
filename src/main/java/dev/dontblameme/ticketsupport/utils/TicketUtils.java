@@ -6,29 +6,25 @@ import dev.dontblameme.ticketsupport.support.Ticket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 public class TicketUtils {
 
     private TicketUtils() {}
 
-    private static final ArrayList<CustomServer> servers = new ArrayList<>();
-    private static final Pattern numberPattern = Pattern.compile("-?\\d+(\\.\\d+)?");
-    private static final ConfigUtils serversConfig = new ConfigUtils("serverConfigs.json");
-    private static final ConfigUtils ticketsConfig = new ConfigUtils("serverTickets.json");
+    private static final ArrayList<CustomServer> SERVERS = new ArrayList<>();
+    private static final ConfigUtils SERVERS_CONFIG = new ConfigUtils("serverConfigs.json");
+    private static final ConfigUtils TICKETS_CONFIG = new ConfigUtils("serverTickets.json");
 
     public static void load() {
         loadServers();
     }
 
     private static void loadTickets(CustomServer server) {
-
-        List<Map<?, ?>> entries = ticketsConfig.getEntries();
+        List<Map<?, ?>> entries = TICKETS_CONFIG.getEntries();
 
         if(entries == null || entries.isEmpty()) return;
 
         entries.forEach(entry -> entry.forEach((key, value) -> {
-
             ArrayList<String> arraylistValue = (ArrayList<String>) value;
             long guildId = Long.parseLong(arraylistValue.get(0));
 
@@ -46,19 +42,18 @@ public class TicketUtils {
     }
 
     private static void loadServers() {
-        List<Map<?, ?>> entries = serversConfig.getEntries();
+        List<Map<?, ?>> entries = SERVERS_CONFIG.getEntries();
 
         if(entries == null || entries.isEmpty()) return;
 
         entries.forEach(entry -> entry.forEach((key, value) -> {
-
             ArrayList<String> arraylistValue = (ArrayList<String>) value;
             long guildId = Long.parseLong((String) key);
             long ticketChannelId = Long.parseLong(arraylistValue.get(0));
             long staffRoleId = Long.parseLong(arraylistValue.get(1));
             CustomServer server = new CustomServer(guildId, ticketChannelId, staffRoleId);
 
-            servers.add(server);
+            SERVERS.add(server);
             loadTickets(server);
         }));
     }
@@ -69,34 +64,28 @@ public class TicketUtils {
     }
 
     private static void saveServerTickets() {
-        ticketsConfig.clear();
-        servers.forEach(server -> server.getTickets().forEach(ticketsConfig::write));
+        TICKETS_CONFIG.clear();
+        SERVERS.forEach(server -> server.getTickets().forEach(TICKETS_CONFIG::write));
     }
 
     private static void saveServerConfigs() {
-        serversConfig.clear();
-        servers.forEach(serversConfig::write);
+        SERVERS_CONFIG.clear();
+        SERVERS.forEach(SERVERS_CONFIG::write);
     }
 
     public static void addServer(CustomServer server) {
-        servers.add(server);
+        SERVERS.add(server);
     }
 
     public static void removeServer(CustomServer server) {
-        servers.remove(server);
+        SERVERS.remove(server);
     }
 
     public static CustomServer getServer(long id) {
-        return servers.stream().filter(server -> server.getGuildId() == id).findFirst().orElse(null);
+        return SERVERS.stream().filter(server -> server.getGuildId() == id).findFirst().orElse(null);
     }
 
     public static boolean existsServer(long id) {
-        return servers.stream().anyMatch(server -> server.getGuildId() == id);
-    }
-
-    public static boolean isNumeric(String strNum) {
-        if(strNum == null) return false;
-
-        return numberPattern.matcher(strNum).matches();
+        return SERVERS.stream().anyMatch(server -> server.getGuildId() == id);
     }
 }

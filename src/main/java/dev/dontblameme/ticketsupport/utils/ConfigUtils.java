@@ -17,7 +17,6 @@ public class ConfigUtils {
     private final Gson gson;
 
     public ConfigUtils(String fileName) {
-
         gson = new Gson();
         file = new File(fileName);
 
@@ -29,47 +28,27 @@ public class ConfigUtils {
         }
     }
 
-    public String getValue(String key) {
-        try(Reader reader = Files.newBufferedReader(getFile().toPath())) {
-
-            Map<?, ?> map = gson.fromJson(reader, Map.class);
-
-            for(Map.Entry<?, ?> entry : map.entrySet())
-                if(entry.getKey().equals(key))
-                    return (String) entry.getValue();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     public List<Map<?, ?>> getEntries() {
         try(BufferedReader reader = Files.newBufferedReader(getFile().toPath())) {
 
             List<Map<?, ?>> list = new ArrayList<>();
 
             reader.lines().forEach(line -> {
-
                 Map<?, ?> map = gson.fromJson(line, Map.class);
 
                 list.add(map);
             });
 
-            if(list.isEmpty()) return null;
-
-            return list;
-
+            return list.isEmpty() ? Collections.emptyList() : list;
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return null;
+        return Collections.emptyList();
     }
 
     public void write(Ticket ticket) {
         try {
-
             JsonObject json = new JsonObject();
             JsonArray array = new JsonArray();
 
@@ -88,7 +67,6 @@ public class ConfigUtils {
 
     public void write(CustomServer customServer) {
         try {
-
             JsonObject json = new JsonObject();
             JsonArray array = new JsonArray();
 
