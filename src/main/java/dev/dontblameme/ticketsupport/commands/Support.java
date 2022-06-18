@@ -34,7 +34,7 @@ public class Support extends Command {
 
         String body = Objects.requireNonNull(e.getValue("body")).getAsString();
 
-        // Here I need to use a thread because i can't load the members in the main thread. Found at Ticket.class in line 44
+        // Here I need to use a thread because I can't load the members in the main thread. Found at Ticket.class in line 44
         new Thread(() -> {
             Ticket ticket = new Ticket(e.getUser().getIdLong(), TicketUtils.getServer(Objects.requireNonNull(e.getGuild()).getIdLong()), body, e.getGuild());
 
