@@ -88,6 +88,7 @@ public class Ticket {
                 .whenComplete((message, error) -> {});
     }
 
+    @Override
     public String toString() {
         return userID + ":" + channel.getGuild().getId() + ":" + channel.getId();
     }

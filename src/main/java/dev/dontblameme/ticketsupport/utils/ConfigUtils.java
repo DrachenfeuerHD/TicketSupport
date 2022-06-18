@@ -5,14 +5,19 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import dev.dontblameme.ticketsupport.support.CustomServer;
 import dev.dontblameme.ticketsupport.support.Ticket;
+import lombok.Getter;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 public class ConfigUtils {
 
+    @Getter
     private final File file;
     private final Gson gson;
 
@@ -90,9 +95,5 @@ public class ConfigUtils {
         } catch(IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public File getFile() {
-        return file;
     }
 }
